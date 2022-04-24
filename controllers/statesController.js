@@ -1,9 +1,13 @@
+const req = require('express/lib/request');
 const State = require('../model/State');
 
 const data = {
     states: require('../model/states.json'),
     setEmployees: function (data) { this.states = data }
 }
+
+const getRandomInt = require("../middleware/randomNumberGenerator");
+const verifyStateCode = require("../middleware/verifyStateCode");
 
 const getStates = (req, res) => {
     var contig="all";
@@ -64,7 +68,8 @@ const getStateFunfact = async (req, res) => {
                 res.json({"message": "No fun facts for "+ data.states[i].state })
             } else {
                 if (state.funfacts.length > 0){
-                    res.json({"funfact": state.funfacts[0] })
+                    var n = getRandomInt(0,state.funfacts.length-1);
+                    res.json({"funfact": state.funfacts[n] })
                 } else {
                     res.json({"message": "No fun facts for "+ data.states[i].state })
                 }
@@ -127,10 +132,11 @@ const getStateAdmission = async (req, res) => {
 const createFunFact = async (req, res) => {
     if (!req?.params?.state) return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
     if ( !req?.body?.funfacts) {
-        return res.status(400).json({ 'message': 'Funfacts are requred' });
+        return res.status(400).json({ 'message': 'Funfacts are required' });
     }
     const {  funfacts } = req.body; 
     const stateCode = req.params.state;  
+    if (!verifyStateCode(stateCode)) return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
     var result;
         try {
         const state_m = await State.findOne({ stateCode : stateCode }).exec();
@@ -178,6 +184,32 @@ const updateFunfact = async (req,res) =>{
 
 }
 
+const deleteFunfact = async (req,res) =>{
+    if (!req?.params?.state) return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
+    const stateCode = req.params.state;  
+    if ( !req?.body?.index) {
+        return res.status(400).json({ 'message': 'An index is required' });
+    }
+    const {  index } = req.body; 
+    if (index < 1)  return res.status(400).json({ 'message': 'Invalid index' });
+    var result;
+        try {
+        const state_m = await State.findOne({ stateCode : stateCode }).exec();
+        if (!state_m){
+            return res.status(400).json({ 'message': 'State not found' });
+        } else {
+            if (index > state_m.funfacts.length) return res.status(400).json({ 'message': 'Record not found' });
+            state_m.funfacts.splice(index-1,1);                
+            state_m.save();
+            result = state_m;
+        }
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(500).json({ 'message': err.message });
+    }
+
+}
+
 module.exports = {getStates, getState, getStateFunfact, 
                  getStateCapital,getStateNickname, getStatePopulation,
-                 getStateAdmission, createFunFact, updateFunfact };
+                 getStateAdmission, createFunFact, updateFunfact, deleteFunfact };
