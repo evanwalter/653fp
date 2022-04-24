@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {getStates, getState, getStateFunfact, 
       getStateCapital,getStateNickname,
-      getStatePopulation, getStateAdmission, createFunFact} = require('../controllers/statesController');
+      getStatePopulation, getStateAdmission, createFunFact, updateFunfact} = require('../controllers/statesController');
 //const ROLES_LIST = require('../../config/roles_list');
 //const verifyRoles = require('../../middleware/verifyRoles');
 
@@ -15,6 +15,10 @@ router.route('/')
  router.route('/:state/funfacts')
   .get(getStateFunfact)
   .post(createFunFact);
+  router.route('/:state/funfact')
+  .get(getStateFunfact)
+  .post(createFunFact)
+  .patch(updateFunfact);
   router.route('/:state/capital')
   .get(getStateCapital);
   router.route('/:state/nickname')

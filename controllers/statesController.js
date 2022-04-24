@@ -125,24 +125,59 @@ const getStateAdmission = async (req, res) => {
 
 
 const createFunFact = async (req, res) => {
-    if (!req?.body?.state || !req?.body?.funfacts) {
-        return res.status(400).json({ 'message': 'State and Funfacts are requred' });
+    if (!req?.params?.state) return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
+    if ( !req?.body?.funfacts) {
+        return res.status(400).json({ 'message': 'Funfacts are requred' });
     }
-    const { state, funfacts } = req.body;   
+    const {  funfacts } = req.body; 
+    const stateCode = req.params.state;  
+    var result;
+        try {
+        const state_m = await State.findOne({ stateCode : stateCode }).exec();
+        if (!state_m){
+            const result = await State.create({
+                stateCode: stateCode,
+                funfacts: funfacts
+            });
+        } else {
+            for (var x=0; x < funfacts.length;x++){
+                state_m.funfacts.push(funfacts[x]);                
+            }
+            state_m.save();
 
-    try {
-        const result = await State.create({
-            stateCode: state,
-            funfacts: funfacts
-        });
-
+        }
         res.status(201).json(result);
     } catch (err) {
         res.status(500).json({ 'message': err.message });
     }
 }
 
+const updateFunfact = async (req,res) =>{
+    if (!req?.params?.state) return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
+    const stateCode = req.params.state;  
+    if ( !req?.body?.funfact || !req?.body?.index) {
+        return res.status(400).json({ 'message': 'Funfact and index are requred' });
+    }
+    const {  index, funfact } = req.body; 
+    if (index < 1)  return res.status(400).json({ 'message': 'Invalid index' });
+    var result;
+        try {
+        const state_m = await State.findOne({ stateCode : stateCode }).exec();
+        if (!state_m){
+            return res.status(400).json({ 'message': 'Record not found' });
+        } else {
+            if (index > state_m.funfacts.length) return res.status(400).json({ 'message': 'Record not found' });
+            state_m.funfacts[index-1]= funfact;                
+            state_m.save();
+            result = state_m;
+        }
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(500).json({ 'message': err.message });
+    }
+
+}
 
 module.exports = {getStates, getState, getStateFunfact, 
                  getStateCapital,getStateNickname, getStatePopulation,
-                 getStateAdmission, createFunFact };
+                 getStateAdmission, createFunFact, updateFunfact };
