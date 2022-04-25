@@ -207,9 +207,69 @@ const deleteFunfact = async (req,res) =>{
     } catch (err) {
         res.status(500).json({ 'message': err.message });
     }
+}
 
+
+// -------------------- Lagniappes --------------------------------------
+const getPopulations = (req, res) => {
+    var ord="--";
+    if (req.query.rank != undefined || req.query.ascending != undefined || req.query.descending != undefined) {
+        if (req.query.ascending==="true" || req.query.descending==="false" || req.query.rank==="ascending") {ord="asc" };
+        if (req.query.descending==="true" || req.query.ascending==="false" || req.query.rank==="descending") {ord = "desc"} ; 
+    }
+    newstates=[];
+    for (var i=0; i < data.states.length; i++){
+        newstates.push({ state: data.states[i].code,population:  data.states[i].population})
+    }
+    switch(ord){
+        case "asc":
+            res.json(newstates.sort((a, b) => parseInt(b.population) - parseInt(a.population)).reverse() );
+            break;
+        case "desc":
+            res.json(newstates.sort((a, b) => parseInt(b.population) - parseInt(a.population)) );
+            break;
+        default:
+            res.json(newstates);
+        }
+}
+
+const getAdmissions = (req, res) => {
+    var ord="--";
+    if (req.query.rank != undefined || req.query.ascending != undefined || req.query.descending != undefined) {
+        if (req.query.ascending==="true" || req.query.descending==="false" || req.query.rank==="ascending") {ord="asc" };
+        if (req.query.descending==="true" || req.query.ascending==="false" || req.query.rank==="descending") {ord = "desc"} ; 
+    }
+    newstates=[];
+    for (var i=0; i < data.states.length; i++){
+        newstates.push({ state: data.states[i].code,admission:  data.states[i].admission_date})
+    }
+    switch(ord){
+        case "asc":
+            res.json(newstates.sort((a, b) => parseInt(b.admission) - parseInt(a.admission)).reverse() );
+            break;
+        case "desc":
+            res.json(newstates.sort((a, b) => parseInt(b.admission) - parseInt(a.admission)) );
+            break;
+        default:
+            res.json(newstates);
+        }
+}
+const getCapitals = (req, res) => {
+    newstates=[];
+    for (var i=0; i < data.states.length; i++){
+        newstates.push({ state: data.states[i].code,capital:  data.states[i].capital_city})
+    }
+    res.json(newstates);
+}
+const getNickNames = (req, res) => {
+    newstates=[];
+    for (var i=0; i < data.states.length; i++){
+        newstates.push({ state: data.states[i].code,capital:  data.states[i].nickname})
+    }
+    res.json(newstates);
 }
 
 module.exports = {getStates, getState, getStateFunfact, 
                  getStateCapital,getStateNickname, getStatePopulation,
-                 getStateAdmission, createFunFact, updateFunfact, deleteFunfact };
+                 getStateAdmission, createFunFact, updateFunfact, deleteFunfact,
+                 getPopulations, getAdmissions,getCapitals,getNickNames };
