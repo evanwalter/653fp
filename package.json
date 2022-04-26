@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server",
     "dev": "nodemon server"
+  },"engines": {
+    "node": "14.x"
   },
   "author": "Evan Walter",
   "license": "ISC",

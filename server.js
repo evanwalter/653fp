@@ -4,7 +4,7 @@ const app = express();
 const path = require('path');
 const cors = require('cors');
 const corsOptions = require('./config/corsOptions');
-const { logger } = require('./middleware/logEvents');
+//const { logger } = require('./middleware/logEvents');
 const credentials = require('./middleware/credentials');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3999;
 connectDB();
 
 // custom middleware logger
-app.use(logger);
+//app.use(logger);
 
 // Handle options credentials check - before CORS!
 // and fetch cookies credentials requirement
@@ -31,7 +31,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 //middleware for cookies
-app.use(cookieParser());
+//app.use(cookieParser());
 
 //serve static files
 app.use('/', express.static(path.join(__dirname, '/public')));

@@ -225,11 +225,8 @@ const deleteFunfact = async (req,res) =>{
         if (!state_m){
             return res.status(400).json({ 'message': 'State not found' });
         } else {
-            console.log("FUCKCKERETETE" + index)
-            console.log("FUCK Fackts length" + state_m.funfacts.length)
             if (index > state_m.funfacts.length) return res.status(400).json({ 'message': 'Record not found' });
             index = parseInt(index)-1;
-            console.log("FUCKKKKKKK" + index)
             state_m.funfacts.splice(index,1);                
             state_m.save();
             result = state_m;
