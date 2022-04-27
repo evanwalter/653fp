@@ -8,6 +8,7 @@ const data = {
 
 const getRandomInt = require("../middleware/randomNumberGenerator");
 const verifyStateCode = require("../middleware/verifyStateCode");
+const displayStateDetail = require("../middleware/displayStateDetail");
 
 const getStates = (req, res) => {
     var contig="all";
@@ -47,15 +48,13 @@ const getState = async (req, res) => {
     if (!req?.params?.state) return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
     var statecode =req.params.state.toUpperCase();
     for (var i=0; i < data.states.length; i++){
-
         if (data.states[i].code===statecode){
+            var state_f = displayStateDetail(data.states[i])
             const state = await State.findOne({ stateCode : statecode }).exec();
-            if (!state){
-                data.states[i].funfacts=[];
-            } else {
-                data.states[i].funfacts=state.funfacts;
-                }
-            res.json(data.states[i])
+            if (state){
+                state_f.funfacts=state.funfacts;
+            }
+            res.json(state_f)
         }
     }
     res.status(404).json({ 'message': 'Invalid state abbreviation parameter'});
@@ -68,13 +67,13 @@ const getStateFunfact = async (req, res) => {
         if (data.states[i].code===statecode){
             const state = await State.findOne({ stateCode : statecode }).exec();
             if (!state){
-                res.json({"message": "No fun facts found for "+ data.states[i].state })
+                res.json({"message": "No Fun Facts found for "+ data.states[i].state })
             } else {
                 if (state.funfacts.length > 0){
                     var n = getRandomInt(0,state.funfacts.length-1);
                     res.json({"funfact": state.funfacts[n] })
                 } else {
-                    res.json({"message": "No fun facts for "+ data.states[i].state })
+                    res.json({"message": "No Fun Facts for "+ data.states[i].state })
                 }
             }
         }
@@ -108,7 +107,7 @@ const getStatePopulation = async (req, res) => {
     var result;
     for (var i=0; i < data.states.length; i++){
         if (data.states[i].code===stateCode){
-            result={"state": data.states[i].state, "population": data.states[i].population };
+            result={"state": data.states[i].state, "population": data.states[i].population.toLocaleString("en-US") };
         }
     }
     if (!result){
@@ -144,23 +143,27 @@ const createFunFact = async (req, res) => {
         return res.status(400).json({ 'message': 'State fun facts value required' });
     }
     const {  funfacts } = req.body; 
-    if (!funfacts instanceof Array) return res.status(400).json({ 'message': 'State fun facts value must be an array' });
+    if (!(funfacts instanceof Array)) return res.status(400).json({ 'message': 'State fun facts value must be an array' });
     var result;
-        try {
+    var fun_facts_arr= [];
+    try {
         const state_m = await State.findOne({ stateCode : stateCode }).exec();
         if (!state_m){
             const result = await State.create({
                 stateCode: stateCode,
                 funfacts: funfacts
             });
+            fun_facts_arr= funfacts;
         } else {
+            fun_facts_arr= state_m.funfacts;
             for (var x=0; x < funfacts.length;x++){
-                state_m.funfacts.push(funfacts[x]);                
+                state_m.funfacts.push(funfacts[x]); 
             }
             state_m.save();
-            result =await State.findOne({ stateCode : stateCode }).exec();
-
+            
         }
+        console.log(state_m)
+        result = state_m;//{ stateCode : stateCode, funfacts: fun_facts_arr };
         res.status(201).json(result);
     } catch (err) {
         res.status(500).json({ 'message': err.message });
@@ -197,7 +200,7 @@ const updateFunfact = async (req,res) =>{
                         stateName=data.states[i].state;
                     }
                 }
-                return res.status(400).json({ 'message': 'No Fun Facts found at that index for '+stateName });   
+                return res.status(400).json({ 'message': 'No Fun Fact found at that index for '+stateName });   
             } 
             state_m.funfacts[index-1]= funfact;                
             state_m.save();
@@ -214,18 +217,24 @@ const deleteFunfact = async (req,res) =>{
     if (!req?.params?.state) return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
     var stateCode =req.params.state.toUpperCase();
     if ( !req?.body?.index) {
-        return res.status(400).json({ 'message': 'An index is required' });
+        return res.status(400).json({ 'message': 'State fun fact index value required' });
     }
     var index = req.body.index; 
     if (index < 1)  return res.status(400).json({ 'message': 'Invalid index' });
     
     var result;
-        try {
+    try {
+        var stateName="";
+        for (var i=0; i < data.states.length; i++){
+                if (data.states[i].code===stateCode){
+                    stateName=data.states[i].state;
+                }
+            }    
         var state_m = await State.findOne({ stateCode : stateCode }).exec();
         if (!state_m){
-            return res.status(400).json({ 'message': 'State not found' });
+            return res.status(400).json({ 'message': 'No Fun Facts found for ' + stateName });
         } else {
-            if (index > state_m.funfacts.length) return res.status(400).json({ 'message': 'Record not found' });
+            if (index > state_m.funfacts.length) return res.status(400).json({ 'message': 'No Fun Fact found at that index for '+ stateName});
             index = parseInt(index)-1;
             state_m.funfacts.splice(index,1);                
             state_m.save();

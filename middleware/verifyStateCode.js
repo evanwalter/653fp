@@ -1,7 +1,7 @@
 
 const data = {
-    states: require('../model/states.json'),
-    setEmployees: function (data) { this.states = data }
+    states: require('../model/states.json')
+    //setEmployees: function (data) { this.states = data }
 }
 
 function verifyStateCode(stateCode) {
