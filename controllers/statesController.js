@@ -10,7 +10,7 @@ const getRandomInt = require("../middleware/randomNumberGenerator");
 const verifyStateCode = require("../middleware/verifyStateCode");
 const displayStateDetail = require("../middleware/displayStateDetail");
 
-const getStates = (req, res) => {
+const getStates = async (req, res) => {
     var contig="all";
     if (req.query.contig != undefined) {
         console.log(req.query.contig)
@@ -23,18 +23,27 @@ const getStates = (req, res) => {
         switch(contig) {
             case "true":
                 if (data.states[i].code != "AK" && data.states[i].code != "HI"){
-                    data.states[i].funfacts=[];
+                    var state_m = await State.findOne({ stateCode : data.states[i].code }).exec();
+                    if (state_m){
+                        data.states[i].funfacts=state_m.funfacts;
+                    } 
                     newstates.push(data.states[i]);
                 }
                 break;
             case "false":
                 if (data.states[i].code === "AK" || data.states[i].code === "HI"){
-                    data.states[i].funfacts=[];
+                    var state_m = await State.findOne({ stateCode : data.states[i].code }).exec();
+                    if (state_m){
+                        data.states[i].funfacts=state_m.funfacts;
+                    } 
                     newstates.push(data.states[i]);
                 }
                 break;
             default:
-                data.states[i].funfacts=[];
+                var state_m = await State.findOne({ stateCode : data.states[i].code }).exec();
+                if (state_m){
+                    data.states[i].funfacts=state_m.funfacts;
+                } 
                 newstates.push(data.states[i]);
         }
     }
@@ -52,7 +61,9 @@ const getState = async (req, res) => {
             var state_f = displayStateDetail(data.states[i])
             const state = await State.findOne({ stateCode : statecode }).exec();
             if (state){
-                state_f.funfacts=state.funfacts;
+                if (state.funfacts){
+                    state_f.funfacts=state.funfacts;
+                }
             }
             res.json(state_f)
         }
