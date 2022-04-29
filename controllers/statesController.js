@@ -260,6 +260,7 @@ const deleteFunfact = async (req,res) =>{
 
 
 // -------------------- Lagniappes --------------------------------------
+// ---------- Display all populations, sorting options
 const getPopulations = (req, res) => {
     var ord="--";
     if (req.query.rank != undefined || req.query.ascending != undefined || req.query.descending != undefined) {
@@ -282,15 +283,34 @@ const getPopulations = (req, res) => {
         }
 }
 
+// ---------- Display all admission dates, sorting options
 const getAdmissions = (req, res) => {
     var ord="--";
+    var datefrom;
     if (req.query.rank != undefined || req.query.ascending != undefined || req.query.descending != undefined) {
         if (req.query.ascending==="true" || req.query.descending==="false" || req.query.rank==="ascending") {ord="asc" };
         if (req.query.descending==="true" || req.query.ascending==="false" || req.query.rank==="descending") {ord = "desc"} ; 
     }
+    // datefrom expected format: 1900-01-01
+    if (req.query.datefrom){
+        console.log(req.query.datefrom)
+        datefrom = new Date(req.query.datefrom);
+        console.log(datefrom)
+    }
     newstates=[];
-    for (var i=0; i < data.states.length; i++){
-        newstates.push({ state: data.states[i].code,admission:  data.states[i].admission_date})
+    if (datefrom){
+        for (var i=0; i < data.states.length; i++){
+            admin_date = new Date(data.states[i].admission_date)
+            console.log(admin_date)
+            console.log(datefrom)
+            if (admin_date > datefrom){
+                newstates.push({ state: data.states[i].code,admission:  data.states[i].admission_date})
+            }
+        }
+    } else {
+        for (var i=0; i < data.states.length; i++){
+            newstates.push({ state: data.states[i].code,admission:  data.states[i].admission_date})
+        }
     }
     switch(ord){
         case "asc":
@@ -303,6 +323,8 @@ const getAdmissions = (req, res) => {
             res.json(newstates);
         }
 }
+
+// ------------------------------------- Listing all Capitals
 const getCapitals = (req, res) => {
     newstates=[];
     for (var i=0; i < data.states.length; i++){
@@ -310,6 +332,8 @@ const getCapitals = (req, res) => {
     }
     res.json(newstates);
 }
+
+// ------------------------------------- Listing all NickNames
 const getNickNames = (req, res) => {
     newstates=[];
     for (var i=0; i < data.states.length; i++){
