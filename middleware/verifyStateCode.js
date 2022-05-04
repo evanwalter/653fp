@@ -5,8 +5,9 @@ const data = {
 }
 
 function verifyStateCode(stateCode) {
-    for (var i=0; i < data.states.length; i++){
-        if (data.states[i].code===stateCode) return true;
+    var codes = data.states.map(s => s.code);
+    for (var i=0; i <codes.length; i++){
+        if (codes[i]===stateCode) return true;
     }
     return false;
 }

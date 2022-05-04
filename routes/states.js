@@ -7,6 +7,7 @@ const {getStates, getState, getStateFunfact, getStateCapital,getStateNickname,
 router.route('/')
 .get(getStates)
 
+// Extras
 router.route('/populations')
   .get(getPopulations);
 router.route('/admissions')
@@ -16,7 +17,7 @@ router.route('/capitals')
 router.route('/nicknames')
 .get(getNickNames);
   
-  
+// Standards
 router.route('/:state/funfacts')
   .get(getStateFunfact)
   .post(createFunFact);
