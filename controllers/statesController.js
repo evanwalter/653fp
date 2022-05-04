@@ -56,19 +56,23 @@ const getState = async (req, res) => {
     }
     if (!req?.params?.state) return res.status(400).json({ 'message': 'Invalid state abbreviation parameter' });
     var statecode =req.params.state.toUpperCase();
+    var state_f;
     for (var i=0; i < data.states.length; i++){
         if (data.states[i].code===statecode){
-            var state_f = displayStateDetail(data.states[i])
+            state_f = displayStateDetail(data.states[i])
             const state = await State.findOne({ stateCode : statecode }).exec();
             if (state){
                 if (state.funfacts){
                     state_f.funfacts=state.funfacts;
                 }
             }
-            res.json(state_f)
+            
         }
     }
-    res.status(404).json({ 'message': 'Invalid state abbreviation parameter'});
+    if (!state_f){
+        res.status(404).json({ 'message': 'Invalid state abbreviation parameter'});
+    }
+    res.json(state_f);
 }
 
 const getStateFunfact = async (req, res) => {
